@@ -18,3 +18,13 @@ print(len(hash_key_ls))
 print( data_set_tidy['p_sq_34_pz_0']['A3_tsep_3'] )
 print( np.swapaxes(data_set_avg['A3_tsep_3'],0,1)[0] )
 
+
+# %%
+import gvar as gv
+
+n3 = gv.load('dump/A3_00_0_ls_till_p_sq_32_n3')
+n4 = gv.load('dump/A3_00_0_ls_till_p_sq_32_n4')
+
+print(n3)
+print(n4)
+# %%

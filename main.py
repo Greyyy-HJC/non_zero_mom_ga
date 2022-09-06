@@ -183,9 +183,9 @@ for mom_ls in [p_sq_ls_non_zero[:i] for i in range(len(p_sq_ls_non_zero)+1)]:
     fit_res, fcn_mom = do_fit(mom_ls, pt2_n, pt3_n)
     A3_00_0_ls.append( fit_res.p['A3_00_0'] )
 
-gv.dump(A3_00_0_ls, 'dump/A3_00_0_ls_till_p_sq_{}'.format(p_sq_ls_non_zero[-1]))
+gv.dump(A3_00_0_ls, 'dump/A3_00_0_ls_till_p_sq_{}_n{}'.format(*[p_sq_ls_non_zero[-1], pt3_n]))
 
-errorbar_plot([0]+p_sq_ls_non_zero, [v.mean for v in A3_00_0_ls], [v.sdev for v in A3_00_0_ls], 'A3_00_0_different_mom_ls_till_p_sq_{}'.format(p_sq_ls_non_zero[-1]), ylim=[1.2, 1.4])
+errorbar_plot([0]+p_sq_ls_non_zero, [v.mean for v in A3_00_0_ls], [v.sdev for v in A3_00_0_ls], 'A3_00_0_different_mom_ls_till_p_sq_{}_n{}'.format(*[p_sq_ls_non_zero[-1], pt3_n]), ylim=[1.2, 1.4])
 
 
 

@@ -18,4 +18,3 @@ print(len(hash_key_ls))
 print( data_set_tidy['p_sq_34_pz_0']['A3_tsep_3'] )
 print( np.swapaxes(data_set_avg['A3_tsep_3'],0,1)[0] )
 
-# %%

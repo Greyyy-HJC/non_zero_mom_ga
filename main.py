@@ -18,7 +18,7 @@ def data_check_meff(data_set_tidy, p_sq):
     t_ls = np.arange(len(pt2_ls))
     meff_ls = pt2_to_meff(pt2_ls)
 
-    # errorbar_plot(t_ls[:-1], [v.mean for v in meff_ls], [v.sdev for v in meff_ls], 'meff_{}'.format(hash_key), ylim=[0, 1.5])
+    errorbar_plot(t_ls[:-1], [v.mean for v in meff_ls], [v.sdev for v in meff_ls], 'meff_{}'.format(hash_key), ylim=[0, 1.5])
 
     meff = np.mean(meff_ls[6:12])
 
@@ -133,9 +133,13 @@ def do_fit(mom_ls, pt2_n, pt3_n):
 
 # %% 
 
+data_check_meff(data_set_tidy, 4)
+
+
+
 #!# check disp relation
-p_sq_ls = [0, 1, 2, 4, 5, 8, 9, 10, 13, 16, 17, 18, 20, 25, 32]
-p_sq_GeV_ls = [v * 0.046 for v in p_sq_ls] #* p_sq * (2pi * 0.197 / L / a)**2
+# p_sq_ls = [0, 1, 2, 4, 5, 8, 9, 10, 13, 16, 17, 18, 20, 25, 32]
+# p_sq_GeV_ls = [v * 0.046 for v in p_sq_ls] #* p_sq * (2pi * 0.197 / L / a)**2
 
 # meff_ls = []
 # for p_sq in p_sq_ls:
@@ -176,16 +180,16 @@ p_sq_ls_non_zero = [1, 2, 4, 5, 8, 9, 10, 13, 16, 17, 18, 20, 25, 32]
 # pt3_n = 3
 # fit_res, fcn_mom = do_fit(mom_ls, pt2_n, pt3_n)
 
-pt2_n = 3
-pt3_n = 3
-A3_00_0_ls = []
-for mom_ls in [p_sq_ls_non_zero[:i] for i in range(len(p_sq_ls_non_zero)+1)]:
-    fit_res, fcn_mom = do_fit(mom_ls, pt2_n, pt3_n)
-    A3_00_0_ls.append( fit_res.p['A3_00_0'] )
+# pt2_n = 3
+# pt3_n = 3
+# A3_00_0_ls = []
+# for mom_ls in [p_sq_ls_non_zero[:i] for i in range(len(p_sq_ls_non_zero)+1)]:
+#     fit_res, fcn_mom = do_fit(mom_ls, pt2_n, pt3_n)
+#     A3_00_0_ls.append( fit_res.p['A3_00_0'] )
 
-gv.dump(A3_00_0_ls, 'dump/A3_00_0_ls_till_p_sq_{}_n{}'.format(*[p_sq_ls_non_zero[-1], pt3_n]))
+# gv.dump(A3_00_0_ls, 'dump/A3_00_0_ls_till_p_sq_{}_n{}'.format(*[p_sq_ls_non_zero[-1], pt3_n]))
 
-errorbar_plot([0]+p_sq_ls_non_zero, [v.mean for v in A3_00_0_ls], [v.sdev for v in A3_00_0_ls], 'A3_00_0_different_mom_ls_till_p_sq_{}_n{}'.format(*[p_sq_ls_non_zero[-1], pt3_n]), ylim=[1.1, 1.5])
+# errorbar_plot([0]+p_sq_ls_non_zero, [v.mean for v in A3_00_0_ls], [v.sdev for v in A3_00_0_ls], 'A3_00_0_different_mom_ls_till_p_sq_{}_n{}'.format(*[p_sq_ls_non_zero[-1], pt3_n]), ylim=[1.1, 1.5])
 
 
 

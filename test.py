@@ -1,11 +1,16 @@
 # %%
 import gvar as gv
 import numpy as np
+import matplotlib.pyplot as plt
 
-[hash_key_ls, data_set_avg] = gv.load('dump/hash_ls_data_set_avg')
 data_set_tidy = gv.load('dump/data_set_tidy')
 
-print(data_set_tidy['p_sq_1_pz_0'])
+print(data_set_tidy['p_sq_0_pz_0']['2pt'])
+
+pt2 = data_set_tidy['p_sq_0_pz_0']['2pt']
+
+plt.errorbar(np.arange(len(pt2)), [v.mean for v in pt2], [v.sdev for v in pt2])
+
 # %%
 print([key for key in data_set_avg])
 print([np.shape(data_set_avg[key]) for key in data_set_avg])

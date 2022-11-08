@@ -29,45 +29,6 @@ def data_check_meff(data_set_tidy, p_sq):
     return meff
     
 
-
-def data_check_R(data_set_tidy):
-    hash_key = 'p_sq_0_pz_0'
-    pt2_0_ls = data_set_tidy['p_sq_0_pz_0']['2pt']
-    pt2_mom_ls = data_set_tidy[hash_key]['2pt']
-
-    tau_center_ls = []
-    R_ls = []
-    for tsep in range(3, 12):
-        pt3_ls = data_set_tidy[hash_key]['A3_tsep_{}'.format(tsep)][1:-1]
-        tau_ls = np.arange(tsep+1)[1:-1]
-        R_tsep = pt2_pt3_to_R(tsep, tau_ls, pt2_0_ls, pt2_mom_ls, pt3_ls)
-
-        tau_center_ls.append(tau_ls - tsep/2)
-        R_ls.append(R_tsep)
-
-    tau_center_ls = np.concatenate(tau_center_ls)
-    R_ls = np.concatenate(R_ls)
-
-    errorbar_plot(tau_center_ls, [v.mean for v in R_ls], [v.sdev for v in R_ls], 'R_A3_{}'.format(hash_key))
-
-
-    tau_center_ls = []
-    R_ls = []
-    for tsep in range(3, 12):
-        pt3_ls = data_set_tidy[hash_key]['V4_tsep_{}'.format(tsep)][1:-1]
-        tau_ls = np.arange(tsep+1)[1:-1]
-        R_tsep = pt2_pt3_to_R(tsep, tau_ls, pt2_0_ls, pt2_mom_ls, pt3_ls)
-
-        tau_center_ls.append(tau_ls - tsep/2)
-        R_ls.append(R_tsep)
-
-    tau_center_ls = np.concatenate(tau_center_ls)
-    R_ls = np.concatenate(R_ls)
-
-    errorbar_plot(tau_center_ls, [v.mean for v in R_ls], [v.sdev for v in R_ls], 'R_V4_{}'.format(hash_key))
-
-
-
 def do_fit(mom_ls, pt2_n, pt3_n):
     a12m130_fit = Fit(prior_ho_a12m130, pt2_n, pt3_n, include_2pt=True, include_3pt=True)
 
@@ -110,7 +71,7 @@ def do_fit(mom_ls, pt2_n, pt3_n):
     # for key in temp:
     #     p0[key] = temp[key].mean
 
-    fit_res = a12m130_fit.fit(data_set_tidy, pt2_t, pt3_A3, pt3_V4, mom_ls, best_p0=None)
+    fit_res, corr = a12m130_fit.fit(data_set_tidy, pt2_t, pt3_A3, pt3_V4, mom_ls, best_p0=None, corr=True)
     post = fit_res.p
 
     # print(fit_res.format(100))
@@ -128,77 +89,87 @@ def do_fit(mom_ls, pt2_n, pt3_n):
 
     print('\n')
 
-    return fit_res, a12m130_fit.fit_func
+    return fit_res, a12m130_fit.fit_func, corr
 
 
 # %% 
-
+#!# check meff plot of mom n
 data_check_meff(data_set_tidy, 4)
 
+#!# check ratio plot of mom n
+fit_on_data_R(data_set_tidy, mom=2, current='V4', title='fit on data R mom 2', ylim=None)
 
-
+# %%
 #!# check disp relation
-# p_sq_ls = [0, 1, 2, 4, 5, 8, 9, 10, 13, 16, 17, 18, 20, 25, 32]
-# p_sq_GeV_ls = [v * 0.046 for v in p_sq_ls] #* p_sq * (2pi * 0.197 / L / a)**2
+p_sq_ls = [0, 1, 2, 4, 5, 8, 9, 10, 13, 16, 17, 18, 20, 25, 32]
+p_sq_GeV_ls = [v * 0.046 for v in p_sq_ls] #* p_sq * (2pi * 0.197 / L / a)**2
 
-# meff_ls = []
-# for p_sq in p_sq_ls:
-#     meff_ls.append( data_check_meff(data_set_tidy, p_sq) )
+meff_ls = []
+for p_sq in p_sq_ls:
+    meff_ls.append( data_check_meff(data_set_tidy, p_sq) )
 
-# print(meff_ls)
+print(meff_ls)
 
-# meff_sq_ls = [(v**2) * 2.695 for v in meff_ls] #* meff * (0.197/0.12)**2
+meff_sq_ls = [(v**2) * 2.695 for v in meff_ls] #* meff * (0.197/0.12)**2
 
-# errorbar_plot(p_sq_GeV_ls, [v.mean for v in meff_sq_ls], [v.sdev for v in meff_sq_ls], 'meff_dispersion_GeV')
-
-
-
-
-#!# fit to get k and b of disp relation
-# def fcn(x, p):
-#     return p['k'] * x + p['b']
-
-# priors = gv.BufferDict()
-# priors['k'] = gv.gvar(0, 10)
-# priors['b'] = gv.gvar(0.36, 10)
-
-# fit_result = lsf.nonlinear_fit(data=(np.array(p_sq_GeV_ls), meff_sq_ls), prior=priors, fcn=fcn, maxit=10000, fitter='scipy_least_squares')
-
-# print(fit_result)
+errorbar_plot(p_sq_GeV_ls, [v.mean for v in meff_sq_ls], [v.sdev for v in meff_sq_ls], 'meff_dispersion_GeV')
 
 
 
+# %%
+#!# check dispersion relation of all mom and fit to get k and b of disp relation
 
-# data_check_R(data_set_tidy)
+def fcn(x, p):
+    return p['k'] * x + p['b']
+
+priors = gv.BufferDict()
+priors['k'] = gv.gvar(0, 10)
+priors['b'] = gv.gvar(1, 10)
+
+fit_result = lsf.nonlinear_fit(data=(np.array(p_sq_GeV_ls), meff_sq_ls), prior=priors, fcn=fcn, maxit=10000, fitter='scipy_least_squares')
+
+print(fit_result) #* k ~ 1 means E^2 = p^2 + m^2 holds
 
 
 
+# %%
+#!# fit mom in []
+mom_ls = [1] #!# included in the fit
+pt2_n = 3
+pt3_n = 3
+fit_res, fcn_mom, corr = do_fit(mom_ls, pt2_n, pt3_n)
+print([key for key in corr])
+
+
+# %%
+print(np.shape(corr['pt3_A3_0', 'pt3_A3_1']))
+print(corr['pt3_A3_0', 'pt3_A3_1'])
+
+
+# %%
+#!# fit mom lists: [0], [0, 1] ...
 p_sq_ls_non_zero = [1, 2, 4, 5, 8, 9, 10, 13, 16, 17, 18, 20, 25, 32]
 
-# mom_ls = [1] #!# included in the fit
-# pt2_n = 3
-# pt3_n = 3
-# fit_res, fcn_mom = do_fit(mom_ls, pt2_n, pt3_n)
 
-# pt2_n = 3
-# pt3_n = 3
-# A3_00_0_ls = []
-# for mom_ls in [p_sq_ls_non_zero[:i] for i in range(len(p_sq_ls_non_zero)+1)]:
-#     fit_res, fcn_mom = do_fit(mom_ls, pt2_n, pt3_n)
-#     A3_00_0_ls.append( fit_res.p['A3_00_0'] )
+pt2_n = 3
+pt3_n = 3
+A3_00_0_ls = []
+for mom_ls in [p_sq_ls_non_zero[:i] for i in range(len(p_sq_ls_non_zero)+1)]:
+    fit_res, fcn_mom, corr = do_fit(mom_ls, pt2_n, pt3_n)
+    A3_00_0_ls.append( fit_res.p['A3_00_0'] )
 
-# gv.dump(A3_00_0_ls, 'dump/A3_00_0_ls_till_p_sq_{}_n{}'.format(*[p_sq_ls_non_zero[-1], pt3_n]))
+gv.dump(A3_00_0_ls, 'dump/A3_00_0_ls_till_p_sq_{}_n{}'.format(*[p_sq_ls_non_zero[-1], pt3_n]))
 
-# errorbar_plot([0]+p_sq_ls_non_zero, [v.mean for v in A3_00_0_ls], [v.sdev for v in A3_00_0_ls], 'A3_00_0_different_mom_ls_till_p_sq_{}_n{}'.format(*[p_sq_ls_non_zero[-1], pt3_n]), ylim=[1.1, 1.5])
+errorbar_plot([0]+p_sq_ls_non_zero, [v.mean for v in A3_00_0_ls], [v.sdev for v in A3_00_0_ls], 'A3_00_0_different_mom_ls_till_p_sq_{}_n{}'.format(*[p_sq_ls_non_zero[-1], pt3_n]), ylim=[1.1, 1.5])
 
 
 
-
+# %%
 # fcn = fcn_mom(mom_ls)
 # post = fit_res.p
 
 # gv.dump(post, 'dump/post')
 
-# fit_on_data_R(data_set_tidy, mom=10, current='A3', title='fit on data R mom 10', ylim=None)
+
 
 # %%

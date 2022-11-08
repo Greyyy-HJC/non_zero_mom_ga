@@ -74,16 +74,13 @@ def data_check_meff(data_set_tidy, p_sq):
 
 
     pt2_ls = data_set_tidy[hash_key]['pp_avg'] #! positive parity
-    # pt2_ls = pt2_ls[::-1] #! negative parity
     t_ls = np.arange(len(pt2_ls))
     meff_ls = pt2_to_meff(pt2_ls)
 
     errorbar_plot(t_ls[:-1][:20], [v.mean for v in meff_ls][:20], [v.sdev for v in meff_ls][:20], 'meff_pp_avg_{}'.format(hash_key))
 
 
-    pt2_ls = data_set_tidy[hash_key]['np_avg']
-    # pt2_ls = -pt2_ls[::-1] #! positive parity
-    # pt2_ls = pt2_ls[::-1] #! negative parity
+    pt2_ls = data_set_tidy[hash_key]['np_avg'] #! negative parity
     t_ls = np.arange(len(pt2_ls))
     meff_ls = pt2_to_meff(pt2_ls)
 
@@ -203,19 +200,32 @@ def fit_mode_2(pt2_t, p, mom):
                 E_list['Epp'+str(i)] += p['dEpp'+str(j)+mo]
                 E_list['Enp'+str(i)] += p['dEnp'+str(j)+mo]
 
-    return
+    val = {}
+    val['pp'] = p['App0'+mo] * p['App0'+mo] * np.exp( - E_list['Epp0'] * pt2_t['pp'] ) + p['Bnp0'+mo] * p['Bnp0'+mo] * np.exp( - E_list['Enp0'] * pt2_t['pp'] )
+    val['np'] = p['Anp0'+mo] * p['Anp0'+mo] * np.exp( - E_list['Enp0'] * pt2_t['np'] ) + p['Bpp0'+mo] * p['Bpp0'+mo] * np.exp( - E_list['Epp0'] * pt2_t['np'] )
+
+    for i in range(1, pt2_n):
+        val['pp'] += ( p['App'+str(i)+mo] * p['App'+str(i)+mo] * np.exp( - E_list['Epp'+str(i)] * pt2_t['pp'] )\
+         + p['Bnp'+str(i)+mo] * p['Bnp'+str(i)+mo] * np.exp( - E_list['Enp'+str(i)] * pt2_t['pp'] ) )
+
+        val['np'] += ( p['Anp'+str(i)+mo] * p['Anp'+str(i)+mo] * np.exp( - E_list['Enp'+str(i)] * pt2_t['np'] )\
+         + p['Bpp'+str(i)+mo] * p['Bpp'+str(i)+mo] * np.exp( - E_list['Epp'+str(i)] * pt2_t['np'] ) )
+
+    return val
 
 def fit_func(mom_ls):
     #!# 0 is not in mom_ls
     def fcn(x, p):
+        fit_mode = fit_mode_2
+
         val = {}
 
         pt2_t = {}
         pt2_t['pp'] = x['pt2_0_pp']
         pt2_t['np'] = x['pt2_0_np']
 
-        val['pt2_0_pp'] = fit_mode_1(pt2_t, p, 0)['pp']
-        val['pt2_0_np'] = fit_mode_1(pt2_t, p, 0)['np']
+        val['pt2_0_pp'] = fit_mode(pt2_t, p, 0)['pp']
+        val['pt2_0_np'] = fit_mode(pt2_t, p, 0)['np']
 
         for mom in mom_ls:
             mo = '_'+str(mom)
@@ -223,8 +233,8 @@ def fit_func(mom_ls):
             pt2_t['pp'] = x['pt2'+mo+'_pp']
             pt2_t['np'] = x['pt2'+mo+'_np']
 
-            val['pt2'+mo+'_pp'] = fit_mode_1(pt2_t, p, mom)['pp']
-            val['pt2'+mo+'_np'] = fit_mode_1(pt2_t, p, mom)['np']
+            val['pt2'+mo+'_pp'] = fit_mode(pt2_t, p, mom)['pp']
+            val['pt2'+mo+'_np'] = fit_mode(pt2_t, p, mom)['np']
 
         return val
     return fcn

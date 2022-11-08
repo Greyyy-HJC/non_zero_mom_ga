@@ -127,7 +127,7 @@ class Fit():
             return val
         return fcn
 
-    def fit(self, data_dic, pt2_t, pt3_A3, pt3_V4, mom_ls, best_p0=None, priors=None, save=False):
+    def fit(self, data_dic, pt2_t, pt3_A3, pt3_V4, mom_ls, best_p0=None, corr=False, priors=None, save=False):
         if priors == None:
             priors = self.prior
 
@@ -229,8 +229,7 @@ class Fit():
         else:
             fit_result = lsf.nonlinear_fit(data=(t_tsep_tau, Amp), prior=priors, fcn=self.fit_func(mom_ls), maxit=10000, fitter='scipy_least_squares', p0=best_p0)
 
-
-
+        print(t_tsep_tau)
 
 
         hexcode = None
@@ -256,4 +255,9 @@ class Fit():
 
         #     print(hexcode)
 
-        return fit_result
+        if corr == True:
+            corr = gv.evalcorr(Amp)
+        else:  
+            corr = 0      
+        
+        return fit_result, corr

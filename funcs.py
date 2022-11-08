@@ -16,6 +16,8 @@ ls_p = {"labelsize": 13}
 
 
 def errorbar_plot(x, y, yerr, title, ylim=None):
+    #* this is a general plot function, so put it here
+
     fig = plt.figure(figsize=fig_size)
     ax = plt.axes(plt_axes)
     ax.errorbar(x, y, yerr, **errorb)
